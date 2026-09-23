@@ -1,4 +1,4 @@
-import { Columns, AlignLeft, Settings, PanelLeftClose, PanelLeft, Keyboard } from 'lucide-react';
+import { Columns, AlignLeft, PanelLeftClose, PanelLeft, Keyboard } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import {
@@ -26,7 +26,6 @@ import { CommentsListModal } from './components/CommentsListModal';
 import { DiffQuickMenu } from './components/DiffQuickMenu';
 import { DiffViewer } from './components/DiffViewer';
 import { FileList } from './components/FileList';
-import { GitHubIcon } from './components/GitHubIcon';
 import { HelpModal } from './components/HelpModal';
 import { Logo } from './components/Logo';
 import { ReloadButton } from './components/ReloadButton';
@@ -47,7 +46,7 @@ import { hasMultipleCommentAuthors } from './utils/commentAuthors';
 import { copyTextToClipboard } from './utils/clipboard';
 import { getFileElementId } from './utils/domUtils';
 import { findCommentPosition } from './utils/navigation/positionHelpers';
-import { resolveEventSourceUrl } from './utils/eventSourceUrl';
+import { resolveApiUrl } from './utils/apiUrl';
 import {
   EMPTY_MERGED_CHUNKS_STATE,
   buildMergedChunksState,
@@ -229,10 +228,11 @@ function App() {
   }, [resolvedSelection]);
   const getCommentApiUrl = useCallback(
     (path: string) => {
+      const resolvedPath = resolveApiUrl(path);
       if (!commentSessionQueryString) {
-        return path;
+        return resolvedPath;
       }
-      return `${path}?${commentSessionQueryString}`;
+      return `${resolvedPath}?${commentSessionQueryString}`;
     },
     [commentSessionQueryString],
   );
@@ -707,7 +707,7 @@ function App() {
         if (requestedSelection?.baseMode === 'merge-base')
           params.set('baseMode', requestedSelection.baseMode);
 
-        const response = await fetch(`/api/diff?${params}`, {
+        const response = await fetch(resolveApiUrl(`/api/diff?${params}`), {
           signal: controller.signal,
         });
         if (!response.ok) throw new Error('Failed to fetch diff data');
@@ -854,7 +854,7 @@ function App() {
 
   // Fetch revision options on mount
   useEffect(() => {
-    fetch('/api/revisions')
+    fetch(resolveApiUrl('/api/revisions'))
       .then((res) => (res.ok ? res.json() : null))
       .then((data: RevisionsResponse | null) => {
         setRevisionOptions(data);
@@ -1028,7 +1028,7 @@ function App() {
 
   // Establish SSE connection for tab close detection
   useEffect(() => {
-    const eventSource = new EventSource(resolveEventSourceUrl('/api/heartbeat'));
+    const eventSource = new EventSource(resolveApiUrl('/api/heartbeat'));
 
     eventSource.onopen = () => {
       console.log('Connected to server heartbeat');
@@ -1108,7 +1108,7 @@ function App() {
   const handleOpenInEditor = useCallback(
     async (filePath: string, lineNumber: number) => {
       try {
-        const response = await fetch('/api/open-in-editor', {
+        const response = await fetch(resolveApiUrl('/api/open-in-editor'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1233,13 +1233,6 @@ function App() {
                 aria-label="Toggle file tree panel"
               >
                 {isFileTreeOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
-              </button>
-              <button
-                onClick={() => setIsSettingsOpen(true)}
-                className="p-2 text-github-text-secondary hover:text-github-text-primary hover:bg-github-bg-tertiary rounded transition-colors"
-                title="Settings"
-              >
-                <Settings size={18} />
               </button>
             </div>
           </div>
@@ -1436,7 +1429,7 @@ function App() {
                 />
               </div>
               {!isMobile && (
-                <div className="p-4 border-t border-github-border flex justify-between items-center">
+                <div className="p-4 border-t border-github-border flex items-center">
                   <button
                     onClick={() => setIsHelpOpen(true)}
                     className="flex items-center gap-1.5 text-github-text-secondary hover:text-github-text-primary transition-colors"
@@ -1445,16 +1438,6 @@ function App() {
                     <Keyboard size={16} />
                     <span className="text-sm">Shortcuts</span>
                   </button>
-                  <a
-                    href="https://github.com/yoshiko-pg/difit"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-github-text-secondary hover:text-github-text-primary transition-colors"
-                    title="View on GitHub"
-                  >
-                    <span className="text-sm">Star on GitHub</span>
-                    <GitHubIcon style={{ height: '18px', width: '18px' }} />
-                  </a>
                 </div>
               )}
             </aside>

@@ -10,6 +10,7 @@ import {
   parseUserSettingsPatch,
   updateUserClientSettings,
   MAX_USER_CONFIG_BYTES,
+  DEFAULT_CLIENT_SETTINGS,
 } from './user-config.js';
 
 describe('user-config', () => {
@@ -50,19 +51,19 @@ describe('user-config', () => {
   describe('readUserConfig', () => {
     it('returns defaults when the file does not exist', async () => {
       const config = await readUserConfig(configPath);
-      expect(config).toEqual({ version: 1, client: {} });
+      expect(config).toEqual({ version: 1, client: DEFAULT_CLIENT_SETTINGS });
     });
 
     it('returns defaults when the file is corrupt', async () => {
       await fs.writeFile(configPath, 'not json', 'utf-8');
       const config = await readUserConfig(configPath);
-      expect(config).toEqual({ version: 1, client: {} });
+      expect(config).toEqual({ version: 1, client: DEFAULT_CLIENT_SETTINGS });
     });
 
     it('returns defaults when client is not an object', async () => {
       await fs.writeFile(configPath, JSON.stringify({ version: 1, client: [1, 2] }), 'utf-8');
       const config = await readUserConfig(configPath);
-      expect(config).toEqual({ version: 1, client: {} });
+      expect(config).toEqual({ version: 1, client: DEFAULT_CLIENT_SETTINGS });
     });
 
     it('reads stored client settings', async () => {
@@ -81,9 +82,15 @@ describe('user-config', () => {
       const nestedPath = join(configDir, 'nested', 'config.json');
       const config = await updateUserClientSettings({ sidebarOpen: false }, nestedPath);
 
-      expect(config).toEqual({ version: 1, client: { sidebarOpen: false } });
+      expect(config).toEqual({
+        version: 1,
+        client: { ...DEFAULT_CLIENT_SETTINGS, sidebarOpen: false },
+      });
       const stored = JSON.parse(await fs.readFile(nestedPath, 'utf-8'));
-      expect(stored).toEqual({ version: 1, client: { sidebarOpen: false } });
+      expect(stored).toEqual({
+        version: 1,
+        client: { ...DEFAULT_CLIENT_SETTINGS, sidebarOpen: false },
+      });
     });
 
     it('shallow-merges the patch into existing settings', async () => {
@@ -91,6 +98,7 @@ describe('user-config', () => {
       const config = await updateUserClientSettings({ sidebarWidth: 400 }, configPath);
 
       expect(config.client).toEqual({
+        ...DEFAULT_CLIENT_SETTINGS,
         diffViewMode: 'split',
         sidebarWidth: 400,
       });

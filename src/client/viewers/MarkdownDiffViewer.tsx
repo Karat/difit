@@ -10,6 +10,7 @@ import type { MergedChunk } from '../hooks/useExpandedLines';
 import { extractFrontmatter, getFrontmatterLines } from '../utils/frontmatter';
 import { computeFrontmatterDiff } from '../utils/frontmatterDiff';
 import { extractMarkdownText, isElementWithCodeProps, isSafeUrl } from '../utils/markdownUtils';
+import { resolveApiUrl } from '../utils/apiUrl';
 
 import { PreviewModeTabs, type PreviewMode } from './PreviewModeTabs';
 import { TextDiffViewer } from './TextDiffViewer';
@@ -716,7 +717,7 @@ export function MarkdownDiffViewer(props: DiffViewerBodyProps) {
       if (!source) return null;
       const encodedPath = encodeURIComponent(source.path);
       const response = await fetch(
-        `/api/blob/${encodedPath}?ref=${encodeURIComponent(source.ref)}`,
+        resolveApiUrl(`/api/blob/${encodedPath}?ref=${encodeURIComponent(source.ref)}`),
       );
       if (!response.ok) {
         throw new Error(`Failed to fetch preview: ${response.statusText}`);

@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 process.env.VITEST_SERVER_TEST = 'true';
 
 import { startServer } from './server.js';
+import { DEFAULT_CLIENT_SETTINGS } from './user-config.js';
 import type { CommentImport } from '../types/diff.js';
 
 // Add fetch polyfill for Node.js test environment
@@ -1088,7 +1089,7 @@ describe('Server Integration Tests', () => {
 
         expect(response.ok).toBe(true);
         const data = (await response.json()) as any;
-        expect(data).toEqual({ version: 1, client: {} });
+        expect(data).toEqual({ version: 1, client: DEFAULT_CLIENT_SETTINGS });
       });
 
       it('PUT /api/user-settings merges and persists client settings', async () => {
@@ -1109,6 +1110,7 @@ describe('Server Integration Tests', () => {
         expect(second.ok).toBe(true);
         const merged = (await second.json()) as any;
         expect(merged.client).toEqual({
+          ...DEFAULT_CLIENT_SETTINGS,
           diffViewMode: 'split',
           sidebarWidth: 400,
         });
@@ -1116,6 +1118,7 @@ describe('Server Integration Tests', () => {
         const getResponse = await fetch(`http://localhost:${port}/api/user-settings`);
         const data = (await getResponse.json()) as any;
         expect(data.client).toEqual({
+          ...DEFAULT_CLIENT_SETTINGS,
           diffViewMode: 'split',
           sidebarWidth: 400,
         });
@@ -1124,6 +1127,7 @@ describe('Server Integration Tests', () => {
           await fs.readFile(join(configDir, 'config.json'), 'utf-8'),
         ) as any;
         expect(stored.client).toEqual({
+          ...DEFAULT_CLIENT_SETTINGS,
           diffViewMode: 'split',
           sidebarWidth: 400,
         });

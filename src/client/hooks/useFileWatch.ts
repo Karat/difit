@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { DiffMode, type ClientWatchState, type WatchEvent } from '../../types/watch.js';
-import { resolveEventSourceUrl } from '../utils/eventSourceUrl';
+import { resolveApiUrl } from '../utils/apiUrl';
 
 interface FileWatchHook {
   shouldReload: boolean;
@@ -39,7 +39,7 @@ export function useFileWatch(
     }
 
     try {
-      const eventSource = new EventSource(resolveEventSourceUrl('/api/watch'));
+      const eventSource = new EventSource(resolveApiUrl('/api/watch'));
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {

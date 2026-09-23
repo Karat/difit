@@ -387,21 +387,21 @@ describe('App Component - Clear Comments Functionality', () => {
       vi.mocked(global.fetch).mockImplementation((input) => {
         const url = String(input);
 
-        if (url.startsWith('/api/comments-json')) {
+        if (url.includes('/api/comments-json')) {
           return Promise.resolve({
             ok: true,
             json: async () => ({ threads: serverThreads }),
           } as Response);
         }
 
-        if (url.startsWith('/api/comments')) {
+        if (url.includes('/api/comments')) {
           return Promise.resolve({
             ok: true,
             json: async () => ({ success: true }),
           } as Response);
         }
 
-        if (url === '/api/revisions') {
+        if (url.includes('/api/revisions')) {
           return Promise.resolve({
             ok: true,
             json: async () => null,
@@ -422,7 +422,7 @@ describe('App Component - Clear Comments Functionality', () => {
       });
 
       expect(vi.mocked(global.fetch)).toHaveBeenCalledWith(
-        '/api/comments-json?base=HEAD%5E&target=HEAD',
+        'http://localhost:3000/api/comments-json?base=HEAD%5E&target=HEAD',
       );
     });
 
@@ -451,21 +451,21 @@ describe('App Component - Clear Comments Functionality', () => {
       vi.mocked(global.fetch).mockImplementation((input) => {
         const url = String(input);
 
-        if (url.startsWith('/api/comments-json')) {
+        if (url.includes('/api/comments-json')) {
           return Promise.resolve({
             ok: true,
             json: async () => ({ threads: serverThreads }),
           } as Response);
         }
 
-        if (url.startsWith('/api/comments')) {
+        if (url.includes('/api/comments')) {
           return Promise.resolve({
             ok: true,
             json: async () => ({ success: true }),
           } as Response);
         }
 
-        if (url === '/api/revisions') {
+        if (url.includes('/api/revisions')) {
           return Promise.resolve({
             ok: true,
             json: async () => null,
@@ -567,12 +567,12 @@ describe('App Component - Comment sync', () => {
 
     await waitFor(() => {
       const commentCalls = mockGlobalFetch.mock.calls.filter(([url]) =>
-        String(url).startsWith('/api/comments?'),
+        String(url).includes('/api/comments?'),
       );
       expect(commentCalls).toHaveLength(1);
 
       const [url, request] = commentCalls[0] as [string, RequestInit];
-      expect(url).toBe('/api/comments?base=HEAD%5E&target=HEAD');
+      expect(url).toBe('http://localhost:3000/api/comments?base=HEAD%5E&target=HEAD');
       expect(request.method).toBe('POST');
       expect(JSON.parse(String(request.body))).toEqual({
         threads: [
@@ -601,12 +601,12 @@ describe('App Component - Comment sync', () => {
 
     await waitFor(() => {
       const commentCalls = mockGlobalFetch.mock.calls.filter(([url]) =>
-        String(url).startsWith('/api/comments?'),
+        String(url).includes('/api/comments?'),
       );
       expect(commentCalls).toHaveLength(2);
 
       const [url, request] = commentCalls[1] as [string, RequestInit];
-      expect(url).toBe('/api/comments?base=HEAD%5E&target=HEAD');
+      expect(url).toBe('http://localhost:3000/api/comments?base=HEAD%5E&target=HEAD');
       expect(request.method).toBe('POST');
       expect(JSON.parse(String(request.body))).toEqual({ threads: [] });
     });
@@ -629,7 +629,7 @@ describe('App Component - Comment sync', () => {
     beforeUnloadHandler?.();
 
     expect(navigator.sendBeacon).toHaveBeenCalledWith(
-      '/api/comments?base=HEAD%5E&target=HEAD',
+      'http://localhost:3000/api/comments?base=HEAD%5E&target=HEAD',
       JSON.stringify({ threads: [] }),
     );
     addEventListenerSpy.mockRestore();
@@ -972,7 +972,7 @@ describe('App Component - Revision-aware refetching', () => {
         } as Response);
       }
 
-      if (url.startsWith('/api/comments?')) {
+      if (url.includes('/api/comments?')) {
         return Promise.resolve({
           ok: true,
           json: async () => ({ success: true }),
@@ -994,7 +994,7 @@ describe('App Component - Revision-aware refetching', () => {
     await waitFor(() => {
       const diffCalls = vi
         .mocked(global.fetch)
-        .mock.calls.filter(([url]) => typeof url === 'string' && url.startsWith('/api/diff'));
+        .mock.calls.filter(([url]) => typeof url === 'string' && url.includes('/api/diff'));
       expect(diffCalls).toHaveLength(2);
       expect(String(diffCalls[1]?.[0])).toContain('base=HEAD%5E%5E');
       expect(String(diffCalls[1]?.[0])).toContain('target=HEAD%5E');
@@ -1005,7 +1005,7 @@ describe('App Component - Revision-aware refetching', () => {
     await waitFor(() => {
       const diffCalls = vi
         .mocked(global.fetch)
-        .mock.calls.filter(([url]) => typeof url === 'string' && url.startsWith('/api/diff'));
+        .mock.calls.filter(([url]) => typeof url === 'string' && url.includes('/api/diff'));
       expect(diffCalls).toHaveLength(3);
       expect(String(diffCalls[2]?.[0])).toContain('base=HEAD%5E%5E');
       expect(String(diffCalls[2]?.[0])).toContain('target=HEAD%5E');

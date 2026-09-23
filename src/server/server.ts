@@ -27,7 +27,12 @@ import { getFileExtension } from '../utils/fileUtils.js';
 
 import { FileWatcherService } from './file-watcher.js';
 import { GitDiffParser } from './git-diff.js';
-import { parseUserSettingsPatch, readUserConfig, updateUserClientSettings } from './user-config.js';
+import {
+  ensureUserConfigFile,
+  parseUserSettingsPatch,
+  readUserConfig,
+  updateUserClientSettings,
+} from './user-config.js';
 
 import {
   type BaseMode,
@@ -125,6 +130,7 @@ export async function startServer(
   options: ServerOptions,
 ): Promise<{ port: number; url: string; isEmpty?: boolean; server?: Server }> {
   const app = express();
+  await ensureUserConfigFile();
   const repositoryPath = resolve(options.repoPath ?? process.cwd());
   const repositoryId = createHash('sha256').update(repositoryPath).digest('hex');
   const initialCommentImports = options.commentImports || [];

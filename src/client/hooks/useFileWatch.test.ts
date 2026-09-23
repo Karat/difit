@@ -84,7 +84,7 @@ describe('useFileWatch', () => {
     it('uses the proxied watch endpoint by default', () => {
       renderHook(() => useFileWatch());
 
-      expect(MockEventSource.instances[0]?.url).toBe('/api/watch');
+      expect(MockEventSource.instances[0]?.url).toBe('http://localhost:3000/api/watch');
     });
 
     it('uses the direct API url when configured for development', () => {
