@@ -32,7 +32,7 @@ describe('userSettings service', () => {
       await expect(fetchClientSettings()).resolves.toEqual({
         diffViewMode: 'split',
       });
-      expect(mockFetch).toHaveBeenCalledWith('/api/user-settings');
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/user-settings');
     });
 
     it('caches the result so concurrent callers share one request', async () => {
@@ -74,7 +74,7 @@ describe('userSettings service', () => {
       await vi.runAllTimersAsync();
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
-      expect(mockFetch).toHaveBeenCalledWith('/api/user-settings', {
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:3000/api/user-settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

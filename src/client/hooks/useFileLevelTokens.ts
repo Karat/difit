@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { type DiffFile } from '../../types/diff';
 import { getPrismLanguageFromFilename } from '../utils/languageDetection';
+import { resolveApiUrl } from '../utils/apiUrl';
 import { loadPrismLanguage } from '../utils/languageLoader';
 import Prism from '../utils/prism';
 
@@ -22,7 +23,7 @@ const MAX_WHOLE_FILE_LINES = 2000;
 async function fetchBlobText(filePath: string, ref: string): Promise<string | null> {
   try {
     const response = await fetch(
-      `/api/blob/${encodeURIComponent(filePath)}?ref=${encodeURIComponent(ref)}`,
+      resolveApiUrl(`/api/blob/${encodeURIComponent(filePath)}?ref=${encodeURIComponent(ref)}`),
     );
     if (!response.ok) return null;
     return await response.text();

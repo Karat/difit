@@ -20,8 +20,30 @@ export function getUserConfigPath(): string {
   return join(homedir(), '.difit', 'config.json');
 }
 
+// Seeded on first run (no config file on disk yet) so a fresh install already
+// has the org's preferred editor integration and layout wired up.
+export const DEFAULT_CLIENT_SETTINGS: Record<string, unknown> = {
+  sidebarWidth: 280,
+  sidebarOpen: true,
+  diffViewMode: 'split',
+  appearance: {
+    fontSize: 15,
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif',
+    theme: 'auto',
+    syntaxTheme: 'github',
+    editor: {
+      id: 'custom',
+      command: '/usr/lib/code-server/lib/vscode/bin/remote-cli/code-server',
+      argsTemplate: '-g %file:%line',
+    },
+    colorVision: 'normal',
+    autoViewedPatterns: [],
+  },
+};
+
 function createDefaultUserConfig(): UserConfig {
-  return { version: CONFIG_VERSION, client: {} };
+  return { version: CONFIG_VERSION, client: DEFAULT_CLIENT_SETTINGS };
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -36,6 +58,25 @@ export function parseUserSettingsPatch(body: unknown): Record<string, unknown> |
     return null;
   }
   return body.client;
+}
+
+// Writes the default config to disk the first time difit runs on a machine,
+// so ~/.difit/config.json is inspectable/editable even before anyone touches
+// the Settings UI. No-ops if a config file is already present (even a
+// corrupt one) so we never clobber user changes.
+export async function ensureUserConfigFile(path: string = getUserConfigPath()): Promise<void> {
+  try {
+    await fs.access(path);
+    return;
+  } catch {
+    // Fall through and create it.
+  }
+
+  const serialized = `${JSON.stringify(createDefaultUserConfig(), null, 2)}\n`;
+  await fs.mkdir(dirname(path), { recursive: true });
+  const tmpPath = `${path}.${process.pid}.tmp`;
+  await fs.writeFile(tmpPath, serialized, 'utf-8');
+  await fs.rename(tmpPath, path);
 }
 
 export async function readUserConfig(path: string = getUserConfigPath()): Promise<UserConfig> {

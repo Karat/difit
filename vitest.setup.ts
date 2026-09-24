@@ -1,3 +1,7 @@
+import { mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 import { Agent, setGlobalDispatcher } from 'undici';
@@ -5,6 +9,10 @@ import { Agent, setGlobalDispatcher } from 'undici';
 // Disable keep-alive for tests to prevent ECONNRESET errors
 // Use pipelining=0 instead of keepAlive=false for this version of undici
 setGlobalDispatcher(new Agent({ pipelining: 0 }));
+
+// Server tests that don't set DIFIT_CONFIG_DIR themselves would otherwise
+// read/write the real ~/.difit/config.json on the machine running the suite.
+process.env.DIFIT_CONFIG_DIR ??= mkdtempSync(join(tmpdir(), 'difit-test-config-'));
 
 // Mock fetch globally for component tests, but not for server integration tests
 if (!process.env.VITEST_SERVER_TEST) {

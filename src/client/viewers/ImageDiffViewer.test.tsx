@@ -50,7 +50,10 @@ describe('ImageDiffViewer', () => {
 
       expect(screen.getByText('Deleted Image')).toBeInTheDocument();
       expect(screen.getByText('Previous version:')).toBeInTheDocument();
-      expect(screen.getByRole('img')).toHaveAttribute('src', '/api/blob/test.jpg?ref=HEAD~1');
+      expect(screen.getByRole('img')).toHaveAttribute(
+        'src',
+        'http://localhost:3000/api/blob/test.jpg?ref=HEAD~1',
+      );
     });
 
     it('renders added image correctly', () => {
@@ -66,7 +69,10 @@ describe('ImageDiffViewer', () => {
 
       expect(screen.getByText('Added Image')).toBeInTheDocument();
       expect(screen.getByText('New file:')).toBeInTheDocument();
-      expect(screen.getByRole('img')).toHaveAttribute('src', '/api/blob/test.jpg?ref=HEAD');
+      expect(screen.getByRole('img')).toHaveAttribute(
+        'src',
+        'http://localhost:3000/api/blob/test.jpg?ref=HEAD',
+      );
     });
 
     it('renders modified image correctly in split mode', () => {
@@ -104,8 +110,14 @@ describe('ImageDiffViewer', () => {
       expect(screen.getByText('Modified Image')).toBeInTheDocument();
 
       const images = screen.getAllByRole('img');
-      expect(images[0]).toHaveAttribute('src', '/api/blob/old-name.jpg?ref=HEAD~1');
-      expect(images[1]).toHaveAttribute('src', '/api/blob/new-name.jpg?ref=HEAD');
+      expect(images[0]).toHaveAttribute(
+        'src',
+        'http://localhost:3000/api/blob/old-name.jpg?ref=HEAD~1',
+      );
+      expect(images[1]).toHaveAttribute(
+        'src',
+        'http://localhost:3000/api/blob/new-name.jpg?ref=HEAD',
+      );
     });
   });
 
@@ -123,8 +135,14 @@ describe('ImageDiffViewer', () => {
       renderViewer(file, { baseCommitish: 'main', targetCommitish: 'feature' });
 
       const images = screen.getAllByRole('img');
-      expect(images[0]).toHaveAttribute('src', '/api/blob/old-test.jpg?ref=main');
-      expect(images[1]).toHaveAttribute('src', '/api/blob/test.jpg?ref=feature');
+      expect(images[0]).toHaveAttribute(
+        'src',
+        'http://localhost:3000/api/blob/old-test.jpg?ref=main',
+      );
+      expect(images[1]).toHaveAttribute(
+        'src',
+        'http://localhost:3000/api/blob/test.jpg?ref=feature',
+      );
     });
 
     it('uses default refs when not provided', () => {
@@ -140,8 +158,11 @@ describe('ImageDiffViewer', () => {
       renderViewer(file);
 
       const images = screen.getAllByRole('img');
-      expect(images[0]).toHaveAttribute('src', '/api/blob/old-test.jpg?ref=HEAD~1');
-      expect(images[1]).toHaveAttribute('src', '/api/blob/test.jpg?ref=HEAD');
+      expect(images[0]).toHaveAttribute(
+        'src',
+        'http://localhost:3000/api/blob/old-test.jpg?ref=HEAD~1',
+      );
+      expect(images[1]).toHaveAttribute('src', 'http://localhost:3000/api/blob/test.jpg?ref=HEAD');
     });
 
     it('uses static blob URLs when available', () => {
